@@ -1,0 +1,57 @@
+﻿#pragma kernel CSMain
+
+#include "TonemapCommon.hlsl"
+
+float _Exposure;
+float _Saturation;
+float _Contrast;
+
+Texture2D<float4> _InputTex;
+RWTexture2D<float4> _OutputTex;
+
+float3 LinearToSRGB(float3 c)
+{
+    float3 sRGBLo = c * 12.92;
+    float3 sRGBHi = (pow(max(abs(c), 1e-5), float3(1.0 / 2.4, 1.0 / 2.4, 1.0 / 2.4)) * 1.055) - 0.055;
+    float3 sRGB = (c <= 0.0031308) ? sRGBLo : sRGBHi;
+    return sRGB;
+}
+
+float3 SRGBToLinear(float3 c)
+{
+    float3 linearRGBLo = c / 12.92;
+    float3 linearRGBHi = pow(max(abs((c + 0.055) / 1.055), 1e-5), float3(2.4, 2.4, 2.4));
+    float3 linearRGB = (c <= 0.04045) ? linearRGBLo : linearRGBHi;
+    return linearRGB;
+}
+
+float3 LinearToReinhardEncoded(float3 color, float max_white) 
+{
+    float3 numerator = color * (1.0 + (color / (max_white * max_white)));
+    return numerator / (1.0 + color);
+}
+
+float3 ReinhardEncodedToLinear(float3 color, float max_white) 
+{
+    float3 a = color - 1.0;
+    float b = max_white * max_white;
+    return (a + sqrt(a * a + 4.0 * color / b)) * b / 2.0;
+}
+
+[numthreads(8, 8, 1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    float3 colorLutSpace = _InputTex[id.xy].rgb;
+
+    // Convert color back from Reinhard encoded to linear color
+    float3 colorLinear = ReinhardEncodedToLinear(colorLutSpace, 32.0);
+
+    // Apply color grading and ACES Filmic tonemapping
+    colorLinear = ColorCorrect(colorLinear, _Saturation, _Contrast, _Exposure);
+    colorLinear = ACESFilm(colorLinear);
+
+    // Linear to sRGB
+    float3 colorSrgb = LinearToSRGB(colorLinear);
+
+    _OutputTex[id.xy] = float4(colorSrgb, 1.0);
+}

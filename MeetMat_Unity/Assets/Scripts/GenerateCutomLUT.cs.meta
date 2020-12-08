@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: bcc040c8e2ecc9248aeb3a07e10a8b0a
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - m_InputLUT: {fileID: 2800000, guid: 077e6d0b4b9efe94c8640ff598285baa, type: 3}
+  - m_OutputLUT: {fileID: 2800000, guid: 9bd33bef8089837458439a523310cb69, type: 3}
+  - m_GenerateShader: {fileID: 7200000, guid: 0f8b9ecf55534a546a6efb0036c425db, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
