@@ -36,7 +36,7 @@ float DielectricSpecularToF0(float specular)
 
 vec3 ComputeF0(float specular, vec3 baseColor, float metallic)
 {
-	return mix(DielectricSpecularToF0(specular).xxx, baseColor, metallic);
+	return mix(vec3(DielectricSpecularToF0(specular)), baseColor, metallic);
 }
 
 vec3 DisneyDiffuseTerm(float NdotV, float NdotL, float LdotH, float perceptualRoughness, vec3 baseColor)
